@@ -13,7 +13,7 @@ logger = logging.getLogger('mkdocs')
 
 
 class RzkPluginConfig(base.Config):
-    pass
+    path = c.Type(str, default='rzk')
 
 
 class RzkPlugin(BasePlugin[RzkPluginConfig]):
@@ -26,7 +26,7 @@ class RzkPlugin(BasePlugin[RzkPluginConfig]):
         logger.info('Checking if rzk is available (to render SVG diagrams)')
         try:
             # Capture output to prevent logging usage
-            subprocess.run('rzk', capture_output=True)
+            subprocess.run(self.config.path, capture_output=True)
         except FileNotFoundError:
             logger.warning('rzk executable not found (will not generate diagrams)')
             self.rzk_installed = False
@@ -43,7 +43,7 @@ class RzkPlugin(BasePlugin[RzkPluginConfig]):
         for (fenced_block, code) in code_blocks:
             previous_snippets.append(code.replace('#lang rzk-1', ''))
             full_code = '\n'.join(previous_snippets).encode()
-            process = subprocess.run(['rzk', 'typecheck'], capture_output=True, input=full_code)
+            process = subprocess.run([self.config.path, 'typecheck'], capture_output=True, input=full_code)
             if process.returncode != 0:
                 logger.debug(process.stderr.decode())
                 continue
