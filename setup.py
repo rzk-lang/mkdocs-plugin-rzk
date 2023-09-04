@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='mkdocs-plugin-rzk',
-    version='0.1.2',
+    version='0.1.3',
     description='A MkDocs plugin for Literate Rzk',
     long_description='This plugin automates the generation of SVG renderings for code snippets in Literate Rzk Markdown files rendered using MkDocs.',
     keywords='mkdocs',
