@@ -14,7 +14,8 @@ logger = logging.getLogger('mkdocs')
 
 class RzkPluginConfig(base.Config):
     path = c.Type(str, default='rzk')
-
+    render_svg = c.Type(bool, default=True)
+    anchor_definitions = c.Type(bool, default=True)
 
 class RzkPlugin(BasePlugin[RzkPluginConfig]):
     def __init__(self):
@@ -33,6 +34,7 @@ class RzkPlugin(BasePlugin[RzkPluginConfig]):
             self.rzk_installed = False
 
     def on_page_markdown(self, md: str, page: Page, config: MkDocsConfig, files: Files) -> str:
+        if not self.config.render_svg: return md
         if not page.file.src_uri.endswith('.rzk.md'): return md
         if not self.rzk_installed: return md
         logger.info('Inserting SVG diagrams in ' + page.file.src_uri)
@@ -60,10 +62,11 @@ class RzkPlugin(BasePlugin[RzkPluginConfig]):
 
         return md
 
-    def on_page_content(self, html: str, *, page: Page, config: MkDocsConfig, files: Files) -> str | None:
+    def on_page_content(self, html: str, *, page: Page, config: MkDocsConfig, files: Files) -> str:
+        if not self.config.anchor_definitions: return html
         defines = self.define_name.findall(html)
         for (span, name) in defines:
-            a = f'<a href="#define-{name}" id="define-{name}" style="visibility: visible; position: relative; color: inherit">{name}</a>'
+            a = f'<a href="#define:{name}" id="define:{name}" style="visibility: visible; position: relative; color: inherit">{name}</a>'
             span_with_link = span.replace(name, a)
             html = html.replace(span, span_with_link)
         return html
