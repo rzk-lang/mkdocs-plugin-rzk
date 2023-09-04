@@ -19,6 +19,7 @@ class RzkPluginConfig(base.Config):
 class RzkPlugin(BasePlugin[RzkPluginConfig]):
     def __init__(self):
         self.rzk_code_block = re.compile(r'(^```\s*rzk[^\n]*\s+(.*?)\s+^```)', flags=re.MULTILINE | re.DOTALL)
+        self.define_name = re.compile(r'(<span class="nf">(.*?)</span>)')
         self.svg_element = re.compile(r'^(<svg.*?</svg>)', flags=re.MULTILINE | re.DOTALL)
         self.rzk_installed = True
 
@@ -58,3 +59,11 @@ class RzkPlugin(BasePlugin[RzkPluginConfig]):
                 md = md.replace(fenced_block, svg + '\n\n' + fenced_block)
 
         return md
+
+    def on_page_content(self, html: str, *, page: Page, config: MkDocsConfig, files: Files) -> str | None:
+        defines = self.define_name.findall(html)
+        for (span, name) in defines:
+            a = f'<a href="#define-{name}" id="define-{name}" style="visibility: visible; position: relative; color: inherit">{name}</a>'
+            span_with_link = span.replace(name, a)
+            html = html.replace(span, span_with_link)
+        return html
