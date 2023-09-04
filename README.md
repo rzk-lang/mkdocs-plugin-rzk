@@ -11,9 +11,11 @@ plugins:
 
 The following config options are supported:
 
-| Name | Type  | Default | Description                |
-| ---- | ----- | ------- | -------------------------- |
-| path | `str` | `rzk`   | Path to the Rzk executable |
+| Name               | Type   | Default | Description                                     |
+| ------------------ | ------ | ------- | ----------------------------------------------- |
+| path               | `str`  | `rzk`   | Path to the Rzk executable                      |
+| render_svg         | `bool` | `True`  | Enable/disable rendering SVGs for definitions (currently only works for files without dependencies) |
+| anchor_definitions | `bool` | `True`  | Turn names of definitions into links to themselves (useful for generating a link to a particular `#define` in the generated MkDocs) |
 
 ## Development
 
