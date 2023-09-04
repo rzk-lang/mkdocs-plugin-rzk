@@ -12,6 +12,7 @@ setup(
     license='MIT',
     project_urls={
         'Source': 'https://github.com/rzk-lang/mkdocs-plugin-rzk',
+        'Release notes': 'https://github.com/rzk-lang/mkdocs-plugin-rzk/blob/master/CHANGELOG.md',
         'Tracker': 'https://github.com/rzk-lang/mkdocs-plugin-rzk/issues',
     },
     install_requires=[
