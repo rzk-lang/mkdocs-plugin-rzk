@@ -10,6 +10,10 @@ setup(
     author='Abdelrahman Abounegm',
     author_email='a.abounegm@innopolis.university',
     license='MIT',
+    project_urls={
+        'Source': 'https://github.com/rzk-lang/mkdocs-plugin-rzk',
+        'Tracker': 'https://github.com/rzk-lang/mkdocs-plugin-rzk/issues',
+    },
     install_requires=[
         'mkdocs>=1.4.0'
     ],
