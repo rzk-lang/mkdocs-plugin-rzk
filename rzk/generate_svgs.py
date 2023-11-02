@@ -19,9 +19,12 @@ class RzkPluginConfig(base.Config):
 
 class RzkPlugin(BasePlugin[RzkPluginConfig]):
     def __init__(self):
-        self.rzk_code_block = re.compile(r'(^```\s*rzk[^\n]*\s+(.*?)\s+^```)', flags=re.MULTILINE | re.DOTALL)
+        self.define_svg = re.compile(
+            r'\[ \d+ out of \d+ \] Checking (#def(?:ine)? \S+)' # Match the definition name
+            r'(?!\s*\[ \d+ out of \d+ \]).+?' # Eat everything up to <svg> or next definition
+            r'(<svg.*?<\/svg>)', # Match the SVG
+        flags=re.MULTILINE | re.DOTALL)
         self.define_name = re.compile(r'(<span class="nf">(.*?)</span>)')
-        self.svg_element = re.compile(r'^(<svg.*?</svg>)', flags=re.MULTILINE | re.DOTALL)
         self.rzk_installed = True
 
     def on_startup(self, *, command: Literal['build', 'gh-deploy', 'serve'], dirty: bool) -> None:
@@ -38,27 +41,22 @@ class RzkPlugin(BasePlugin[RzkPluginConfig]):
         if not page.file.src_uri.endswith('.rzk.md'): return md
         if not self.rzk_installed: return md
         logger.info('Inserting SVG diagrams in ' + page.file.src_uri)
-        # Some snippets can depend on terms defined in previous snippets, so we need to store them all
-        previous_snippets = ['#lang rzk-1\n#set-option "render" = "svg"\n\n']
-        # Since each snippet will contain previous ones, the previously printed SVGs should not be repeated
-        previous_svgs: set[str] = set()
-        code_blocks = self.rzk_code_block.findall(md)
-        for (fenced_block, code) in code_blocks:
-            previous_snippets.append(code.replace('#lang rzk-1', ''))
-            full_code = '\n'.join(previous_snippets).encode()
-            process = subprocess.run([self.config.path, 'typecheck'], capture_output=True, input=full_code)
-            if process.returncode != 0:
-                logger.debug(process.stderr.decode())
-                continue
+        process = subprocess.run([self.config.path, 'typecheck', page.file.abs_src_path], capture_output=True)
+        output = process.stderr.decode()
+        if process.returncode != 0:
+            logger.debug(output)
+            return md
 
-            output = process.stderr.decode()
-            svgs: list[str] = self.svg_element.findall(output)
-            # One snippet might have more than one diagram, so we shouldn't just use svgs[-1]
-            # However, there is probably a more efficient way than iterating over all matches everytime
-            for svg in svgs:
-                if svg in previous_svgs: continue
-                previous_svgs.add(svg)
-                md = md.replace(fenced_block, svg + '\n\n' + fenced_block)
+        svgs = self.define_svg.findall(output)
+        for (name, svg) in svgs:
+            # Find the code block that includes the given name and prepend it with the svg
+            fenced_block_pattern = rf'```rzk[^`]*{re.escape(name)}\s[^`]*```'
+            match = re.search(fenced_block_pattern, md)
+            if match is None:
+                logger.warning(f'Failed to find the code block containing "{name}"')
+                continue
+            fenced_block = match[0]
+            md = md.replace(fenced_block, svg + '\n\n' + fenced_block)
 
         return md
 
