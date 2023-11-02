@@ -4,6 +4,12 @@ All notable changes to the "mkdocs-plugin-rzk" plugin will be documented in this
 
 Check [Keep a Changelog](https://keepachangelog.com/) for recommendations on how to structure this file.
 
+## v0.1.4 - 2023.11.02
+
+### Fixed
+
+- Rendering topes as SVGs was broken by the `v0.6.5` release of Rzk. This patch fixes it while also improving performance.
+
 ## v0.1.3 - 2023.09.04
 
 ### Added
