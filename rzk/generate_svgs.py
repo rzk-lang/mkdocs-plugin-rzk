@@ -1,7 +1,6 @@
 import re
 import logging
 import subprocess
-import tempfile
 from typing import Literal
 
 from mkdocs.plugins import BasePlugin
@@ -42,10 +41,7 @@ class RzkPlugin(BasePlugin[RzkPluginConfig]):
         if not page.file.src_uri.endswith('.rzk.md'): return md
         if not self.rzk_installed: return md
         logger.info('Inserting SVG diagrams in ' + page.file.src_uri)
-        with tempfile.NamedTemporaryFile(suffix='.rzk', delete_on_close=False) as f:
-            f.write(md.encode())
-            f.close()
-            process = subprocess.run([self.config.path, 'typecheck', f.name], capture_output=True)
+        process = subprocess.run([self.config.path, 'typecheck', page.file.abs_src_path], capture_output=True)
         output = process.stderr.decode()
         if process.returncode != 0:
             logger.debug(output)
