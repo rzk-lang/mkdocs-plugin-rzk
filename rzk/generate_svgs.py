@@ -1,6 +1,7 @@
 import re
 import logging
 import subprocess
+import tempfile
 from typing import Literal
 
 from mkdocs.plugins import BasePlugin
@@ -46,7 +47,10 @@ class RzkPlugin(BasePlugin[RzkPluginConfig]):
         for (fenced_block, code) in code_blocks:
             previous_snippets.append(code.replace('#lang rzk-1', ''))
             full_code = '\n'.join(previous_snippets).encode()
-            process = subprocess.run([self.config.path, 'typecheck'], capture_output=True, input=full_code)
+            with tempfile.NamedTemporaryFile(suffix='.rzk', delete_on_close=False) as f:
+                f.write(full_code)
+                f.close()
+                process = subprocess.run([self.config.path, 'typecheck', f.name], capture_output=True)
             if process.returncode != 0:
                 logger.debug(process.stderr.decode())
                 continue
