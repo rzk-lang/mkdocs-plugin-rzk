@@ -1,5 +1,7 @@
 # Rzk plugin for MkDocs
 
+[![PyPI - Version](https://img.shields.io/pypi/v/mkdocs-plugin-rzk)](https://pypi.org/project/mkdocs-plugin-rzk/)
+
 This is a [MkDocs plugin](https://www.mkdocs.org/dev-guide/plugins) for rendering SVG diagrams for Literate Rzk Markdown files (any file ending in `.rzk.md` extension). To use it, simply install the latest version (`pip install mkdocs-plugin-rzk`) and add it to your `mkdocs.yml` config file:
 
 ```yaml
